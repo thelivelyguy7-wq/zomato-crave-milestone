@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Zomato AI - Recommendations</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                  "on-secondary": "#2f3131",
+                  "secondary-fixed": "#e2e2e2",
+                  "on-primary-container": "#ffe2e0",
+                  "tertiary-fixed": "#c1e8ff",
+                  "tertiary-container": "#007195",
+                  "surface-dim": "#121317",
+                  "on-secondary-fixed-variant": "#454747",
+                  "inverse-primary": "#bc1124",
+                  "inverse-surface": "#e3e2e7",
+                  "surface": "#121317",
+                  "surface-container-low": "#1a1b1f",
+                  "error-container": "#93000a",
+                  "on-tertiary-container": "#d0edff",
+                  "surface-container-lowest": "#0d0e12",
+                  "error": "#ffb4ab",
+                  "tertiary": "#80d0f8",
+                  "surface-variant": "#343539",
+                  "on-surface-variant": "#e4bdbb",
+                  "on-error": "#690005",
+                  "surface-tint": "#ffb3af",
+                  "secondary": "#c6c6c7",
+                  "inverse-on-surface": "#2f3034",
+                  "primary": "#ffb3af",
+                  "primary-fixed-dim": "#ffb3af",
+                  "secondary-container": "#454747",
+                  "on-tertiary-fixed": "#001e2b",
+                  "primary-container": "#cb202d",
+                  "on-surface": "#e3e2e7",
+                  "outline": "#ab8886",
+                  "on-error-container": "#ffdad6",
+                  "tertiary-fixed-dim": "#80d0f8",
+                  "surface-container-high": "#292a2e",
+                  "background": "#121317",
+                  "surface-container-highest": "#343539",
+                  "secondary-fixed-dim": "#c6c6c7",
+                  "surface-container": "#1e1f23",
+                  "on-secondary-container": "#b4b5b5",
+                  "primary-fixed": "#ffdad7",
+                  "outline-variant": "#5b403e",
+                  "on-secondary-fixed": "#1a1c1c",
+                  "on-primary-fixed": "#410005",
+                  "on-primary": "#68000d",
+                  "on-background": "#e3e2e7",
+                  "surface-bright": "#38393d",
+                  "on-primary-fixed-variant": "#930017",
+                  "on-tertiary-fixed-variant": "#004d66",
+                  "on-tertiary": "#003548"
+              },
+              fontFamily: {
+                  "headline-lg": ["Sora"],
+                  "body-md": ["Inter"],
+                  "label-sm": ["Inter"],
+                  "headline-md": ["Sora"],
+                  "display-lg": ["Sora"],
+                  "label-md": ["Inter"],
+                  "body-lg": ["Inter"]
+              }
+            }
+          }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-panel-elevated {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .ai-border {
+            position: relative;
+        }
+        .ai-border::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(45deg, #cb202d, #80d0f8);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            animation: rotateGradient 4s linear infinite;
+        }
+        @keyframes rotateGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #121317; }
+        ::-webkit-scrollbar-thumb { background: #343539; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #454747; }
+        
+        .budget-btn.active {
+            background-color: rgba(255, 179, 175, 0.2);
+            color: #ffb3af;
+            border: 1px solid rgba(255, 179, 175, 0.3);
+        }
+        .budget-btn:not(.active) {
+            background-color: #343539;
+            color: #e3e2e7;
+            border: 1px solid transparent;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex overflow-hidden antialiased">
+    <!-- Side Nav Bar -->
+    <nav class="hidden md:flex flex-col h-screen overflow-y-auto w-[30%] fixed left-0 top-0 border-r border-white/10 backdrop-blur-xl bg-surface/50 p-6 gap-6 z-50">
+        <div class="pt-4">
+            <h1 class="font-headline-lg text-3xl font-bold text-primary tracking-tight">CraveAI</h1>
+            <p class="font-body-md text-on-surface-variant mt-1">Zomato AI Recommendations</p>
+        </div>
+
+        <div class="mt-auto glass-panel rounded-2xl p-6">
+            <h2 class="font-headline-md text-2xl mb-6">Refine Craving</h2>
+            <form id="preference-form" class="flex flex-col gap-5">
+                
+                <div class="flex flex-col gap-2">
+                    <label class="font-label-sm text-xs text-on-surface-variant">Location *</label>
+                    <select id="location-select" required class="w-full bg-[#0A0A0A] border border-white/10 rounded-lg p-3 text-on-background focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors">
+                        <option value="">Loading...</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label class="font-label-sm text-xs text-on-surface-variant">Cuisine</label>
+                    <select id="cuisine-select" class="w-full bg-[#0A0A0A] border border-white/10 rounded-lg p-3 text-on-background focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors">
+                        <option value="">Any Cuisine</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label class="font-label-sm text-xs text-on-surface-variant">Budget Tier *</label>
+                    <div class="flex gap-2">
+                        <button type="button" class="budget-btn flex-1 py-2 rounded-full font-label-sm transition-colors" data-value="low">Low</button>
+                        <button type="button" class="budget-btn active flex-1 py-2 rounded-full font-label-sm transition-colors" data-value="medium">Med</button>
+                        <button type="button" class="budget-btn flex-1 py-2 rounded-full font-label-sm transition-colors" data-value="high">High</button>
+                    </div>
+                    <input type="hidden" id="budget-input" value="medium">
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label class="font-label-sm text-xs text-on-surface-variant flex justify-between">
+                        <span>Minimum Rating</span>
+                        <span class="text-primary" id="rating-val">4.0+</span>
+                    </label>
+                    <input id="rating-input" class="w-full accent-primary-container bg-surface-variant rounded-full h-1 appearance-none" type="range" min="0" max="5" step="0.1" value="4.0"/>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label class="font-label-sm text-xs text-on-surface-variant">Describe your vibe</label>
+                    <textarea id="prefs-input" class="w-full bg-[#0A0A0A] border border-white/10 rounded-lg p-3 text-on-background focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors resize-none" placeholder="e.g., Cozy spot for a late night date..." rows="2"></textarea>
+                </div>
+
+                <button id="submit-btn" type="submit" class="w-full py-3 bg-primary-container text-white font-label-md rounded-lg hover:bg-inverse-primary transition-colors mt-2 flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">psychology</span>
+                    Get AI Recommendations
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="ml-[30%] w-[70%] h-screen overflow-y-auto relative bg-[#0A0A0A]">
+        <header class="sticky top-0 z-40 flex justify-between items-center w-full px-12 py-6 backdrop-blur-md bg-surface/80 border-b border-white/5">
+            <h2 class="font-headline-md text-2xl text-primary opacity-80">Discover</h2>
+            <div class="flex items-center gap-6 text-on-surface-variant">
+                <span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">search</span>
+                <span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">notifications</span>
+                <span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">settings</span>
+                <span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">account_circle</span>
+            </div>
+        </header>
+
+        <div id="fallback-banner" class="hidden mx-12 mt-6 bg-error-container/20 border border-error-container/50 rounded-lg p-4 flex items-center gap-3 text-error">
+            <span class="material-symbols-outlined">warning</span>
+            <span id="fallback-text" class="font-body-md text-sm">AI Engine unavailable. Showing standard recommendations.</span>
+        </div>
+
+        <div class="p-12 max-w-[1200px] mx-auto">
+            <!-- Empty State -->
+            <div id="empty-state" class="flex flex-col items-center justify-center h-[60vh] text-center">
+                <div class="w-64 h-64 mb-10 relative ai-border rounded-full p-1">
+                    <img class="w-full h-full object-cover rounded-full filter brightness-90 contrast-125" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+                </div>
+                <h3 class="font-display-lg text-4xl mb-4 text-on-background">Your Personal AI Concierge</h3>
+                <p class="font-body-lg text-lg text-on-surface-variant max-w-lg">Tell me what you're craving, and I'll curate the perfect culinary experience.</p>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loading-state" class="hidden flex flex-col items-center justify-center h-[60vh] text-center">
+                <div class="w-16 h-16 border-4 border-white/10 border-t-primary rounded-full animate-spin mb-4"></div>
+                <p class="text-on-surface-variant">AI is thinking...</p>
+            </div>
+
+            <!-- Results State -->
+            <div id="results-state" class="hidden flex flex-col gap-10 pb-24">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="material-symbols-outlined text-primary">auto_awesome</span>
+                    <h3 class="font-headline-lg text-3xl">Top Picks for You</h3>
+                </div>
+                <p id="summary-text" class="text-on-surface-variant mb-4"></p>
+                
+                <div id="results-container" class="flex flex-col gap-6">
+                    <!-- Cards injected here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Template for Restaurant Card -->
+    <template id="card-template">
+        <div class="glass-panel rounded-2xl overflow-hidden hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(203,32,45,0.1)] transition-all duration-300 relative ai-border group p-8">
+            <div class="absolute top-6 left-6 bg-primary-container text-white font-headline-md px-3 py-1 rounded-lg shadow-lg">
+                <span class="card-rank">#1</span>
+            </div>
+            
+            <!-- We pushed the content right to make room for the rank badge -->
+            <div class="ml-16 flex justify-between items-start mb-4">
+                <div>
+                    <h4 class="card-name font-headline-lg text-2xl mb-2 group-hover:text-primary transition-colors">Restaurant Name</h4>
+                    <div class="flex gap-3">
+                        <span class="card-cuisine px-3 py-1 rounded-full bg-surface-variant text-on-background text-sm">Cuisine</span>
+                        <span class="card-location px-3 py-1 rounded-full bg-surface-variant text-on-background text-sm">Location</span>
+                    </div>
+                </div>
+                <div class="flex flex-col items-end">
+                    <div class="flex items-center gap-1 text-primary mb-1">
+                        <span class="material-symbols-outlined">star</span>
+                        <span class="card-rating font-headline-md text-2xl">4.9</span>
+                    </div>
+                    <span class="card-cost text-sm text-on-surface-variant">₹500 • For Two</span>
+                </div>
+            </div>
+            
+            <div class="ml-16 mt-6 p-5 glass-panel-elevated rounded-xl flex gap-4 items-start">
+                <span class="material-symbols-outlined text-tertiary mt-1">psychology</span>
+                <div>
+                    <h5 class="text-xs text-tertiary mb-2 uppercase tracking-wider font-bold">Why AI Chose This</h5>
+                    <p class="card-explanation text-on-background/80">Explanation goes here.</p>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        const API_BASE = "http://127.0.0.1:8000";
+
+        // Budget buttons logic
+        document.querySelectorAll('.budget-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.budget-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                document.getElementById('budget-input').value = e.target.dataset.value;
+            });
+        });
+
+        // Rating slider logic
+        const ratingInput = document.getElementById('rating-input');
+        const ratingVal = document.getElementById('rating-val');
+        ratingInput.addEventListener('input', (e) => {
+            ratingVal.textContent = parseFloat(e.target.value).toFixed(1) + '+';
+        });
+
+        // Fetch Metadata
+        async function fetchMetadata() {
+            try {
+                const [locRes, cuiRes] = await Promise.all([
+                    fetch(`${API_BASE}/locations`),
+                    fetch(`${API_BASE}/cuisines`)
+                ]);
+                
+                const locData = await locRes.json();
+                const locSelect = document.getElementById('location-select');
+                locSelect.innerHTML = '<option value="">Select Location</option>';
+                locData.locations.forEach(loc => {
+                    locSelect.innerHTML += `<option value="${loc}">${loc}</option>`;
+                });
+
+                const cuiData = await cuiRes.json();
+                const cuiSelect = document.getElementById('cuisine-select');
+                cuiSelect.innerHTML = '<option value="">Any Cuisine</option>';
+                cuiData.cuisines.forEach(cui => {
+                    cuiSelect.innerHTML += `<option value="${cui}">${cui}</option>`;
+                });
+            } catch (err) {
+                console.error("Failed to fetch metadata", err);
+                document.getElementById('location-select').innerHTML = '<option value="Bangalore">Bangalore</option>';
+            }
+        }
+
+        // Handle Form Submit
+        document.getElementById('preference-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const location = document.getElementById('location-select').value;
+            if (!location) { alert("Please select a location."); return; }
+
+            const payload = {
+                location: location,
+                budget: document.getElementById('budget-input').value,
+                cuisine: document.getElementById('cuisine-select').value || null,
+                min_rating: parseFloat(document.getElementById('rating-input').value),
+                additional_preferences: document.getElementById('prefs-input').value || null,
+                top_k: 5
+            };
+
+            // UI State
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('results-state').classList.add('hidden');
+            document.getElementById('fallback-banner').classList.add('hidden');
+            document.getElementById('loading-state').classList.remove('hidden');
+
+            try {
+                const res = await fetch(`${API_BASE}/recommendations`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!res.ok) throw new Error("API Error");
+                
+                const data = await res.json();
+                
+                // Hide loading
+                document.getElementById('loading-state').classList.add('hidden');
+                
+                if (data.fallback_used) {
+                    document.getElementById('fallback-banner').classList.remove('hidden');
+                }
+                
+                document.getElementById('summary-text').textContent = data.summary || "";
+                
+                const container = document.getElementById('results-container');
+                container.innerHTML = "";
+                const template = document.getElementById('card-template');
+
+                data.recommendations.forEach((rec, idx) => {
+                    const clone = template.content.cloneNode(true);
+                    clone.querySelector('.card-rank').textContent = '#' + rec.rank;
+                    clone.querySelector('.card-name').textContent = rec.restaurant.name;
+                    clone.querySelector('.card-cuisine').textContent = rec.restaurant.cuisine;
+                    clone.querySelector('.card-location').textContent = rec.restaurant.location;
+                    clone.querySelector('.card-rating').textContent = rec.restaurant.rating;
+                    clone.querySelector('.card-cost').textContent = `₹${rec.restaurant.cost_for_two} • For Two`;
+                    clone.querySelector('.card-explanation').textContent = rec.explanation;
+                    container.appendChild(clone);
+                });
+
+                document.getElementById('results-state').classList.remove('hidden');
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('empty-state').classList.remove('hidden');
+                alert("An error occurred while fetching recommendations.");
+            }
+        });
+
+        // Init
+        fetchMetadata();
+    </script>
+</body>
+</html>

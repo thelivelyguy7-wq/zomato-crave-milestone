@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CraveAI - AI Recommendations</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary": "#2f3131",
+                      "secondary-fixed": "#e2e2e2",
+                      "on-primary-container": "#ffe2e0",
+                      "tertiary-fixed": "#c1e8ff",
+                      "tertiary-container": "#007195",
+                      "surface-dim": "#121317",
+                      "on-secondary-fixed-variant": "#454747",
+                      "inverse-primary": "#bc1124",
+                      "inverse-surface": "#e3e2e7",
+                      "surface": "#121317",
+                      "surface-container-low": "#1a1b1f",
+                      "error-container": "#93000a",
+                      "on-tertiary-container": "#d0edff",
+                      "surface-container-lowest": "#0d0e12",
+                      "error": "#ffb4ab",
+                      "tertiary": "#80d0f8",
+                      "surface-variant": "#343539",
+                      "on-surface-variant": "#e4bdbb",
+                      "on-error": "#690005",
+                      "surface-tint": "#ffb3af",
+                      "secondary": "#c6c6c7",
+                      "inverse-on-surface": "#2f3034",
+                      "primary": "#ffb3af",
+                      "primary-fixed-dim": "#ffb3af",
+                      "secondary-container": "#454747",
+                      "on-tertiary-fixed": "#001e2b",
+                      "primary-container": "#cb202d",
+                      "on-surface": "#e3e2e7",
+                      "outline": "#ab8886",
+                      "on-error-container": "#ffdad6",
+                      "tertiary-fixed-dim": "#80d0f8",
+                      "surface-container-high": "#292a2e",
+                      "background": "#121317",
+                      "surface-container-highest": "#343539",
+                      "secondary-fixed-dim": "#c6c6c7",
+                      "surface-container": "#1e1f23",
+                      "on-secondary-container": "#b4b5b5",
+                      "primary-fixed": "#ffdad7",
+                      "outline-variant": "#5b403e",
+                      "on-secondary-fixed": "#1a1c1c",
+                      "on-primary-fixed": "#410005",
+                      "on-primary": "#68000d",
+                      "on-background": "#e3e2e7",
+                      "surface-bright": "#38393d",
+                      "on-primary-fixed-variant": "#930017",
+                      "on-tertiary-fixed-variant": "#004d66",
+                      "on-tertiary": "#003548"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px",
+                      "2xl": "1rem"
+              },
+              "spacing": {
+                      "xs": "4px",
+                      "container-max": "1440px",
+                      "margin-desktop": "80px",
+                      "lg": "40px",
+                      "md": "24px",
+                      "sm": "12px",
+                      "base": "8px",
+                      "gutter": "24px",
+                      "margin-mobile": "20px",
+                      "xl": "64px"
+              },
+              "fontFamily": {
+                      "headline-lg": [
+                              "Sora"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Sora"
+                      ],
+                      "display-lg": [
+                              "Sora"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "headline-lg-mobile": [
+                              "Sora"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.02em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+            },
+          }
+      </script>
+<style>
+          .glass-panel {
+              background: rgba(255, 255, 255, 0.05);
+              backdrop-filter: blur(20px);
+              -webkit-backdrop-filter: blur(20px);
+              border: 1px solid rgba(255, 255, 255, 0.1);
+          }
+          .glass-panel-elevated {
+              background: rgba(255, 255, 255, 0.08);
+              backdrop-filter: blur(40px);
+              -webkit-backdrop-filter: blur(40px);
+              border: 1px solid rgba(255, 255, 255, 0.1);
+          }
+          .ai-border {
+              position: relative;
+          }
+          .ai-border::before {
+              content: '';
+              position: absolute;
+              inset: -1px;
+              border-radius: inherit;
+              padding: 1px;
+              background: linear-gradient(45deg, #cb202d, #80d0f8);
+              -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+              -webkit-mask-composite: xor;
+              mask-composite: exclude;
+              pointer-events: none;
+              animation: rotateGradient 4s linear infinite;
+          }
+          @keyframes rotateGradient {
+              0% { background-position: 0% 50%; }
+              50% { background-position: 100% 50%; }
+              100% { background-position: 0% 50%; }
+          }
+          /* Custom Scrollbar for dark theme */
+          ::-webkit-scrollbar {
+              width: 8px;
+          }
+          ::-webkit-scrollbar-track {
+              background: #121317; 
+          }
+          ::-webkit-scrollbar-thumb {
+              background: #343539; 
+              border-radius: 4px;
+          }
+          ::-webkit-scrollbar-thumb:hover {
+              background: #454747; 
+          }
+      </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex overflow-hidden antialiased">
+<!-- Side Nav Bar -->
+<nav class="hidden md:flex flex-col h-screen w-[30%] fixed left-0 top-0 border-r border-white/10 backdrop-blur-xl bg-surface/90 dark:bg-surface-container-lowest p-md gap-lg z-50">
+<!-- Brand Logo -->
+<div class="px-md pt-md">
+<h1 class="font-headline-lg text-headline-lg font-bold text-primary dark:text-primary tracking-tight">CraveAI</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-xs">Zomato AI Recommendations</p>
+</div>
+<!-- AI Preference Form -->
+<div class="flex-grow px-md pb-md overflow-y-auto">
+<h2 class="font-headline-md text-headline-md mb-md">Refine Craving</h2>
+<form class="flex flex-col gap-md">
+<!-- Location -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Location</label>
+<select class="w-full bg-[#0A0A0A] border border-white/10 rounded-lg p-sm text-on-background font-body-md focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors">
+<option>Current Location (Downtown)</option>
+<option>West End</option>
+<option>North Side</option>
+</select>
+</div>
+<!-- Budget -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Budget Tier</label>
+<div class="flex gap-sm">
+<button class="flex-1 py-xs rounded-full bg-surface-variant text-on-background font-label-sm hover:bg-primary/20 transition-colors" type="button">Low</button>
+<button class="flex-1 py-xs rounded-full bg-primary/20 text-primary border border-primary/30 font-label-sm transition-colors" type="button">Med</button>
+<button class="flex-1 py-xs rounded-full bg-surface-variant text-on-background font-label-sm hover:bg-primary/20 transition-colors" type="button">High</button>
+</div>
+</div>
+<!-- Cuisine (New) -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Cuisine Preference</label>
+<select class="w-full bg-[#0A0A0A] border border-white/10 rounded-lg p-sm text-on-background font-body-md focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors">
+<option>Any Cuisine</option>
+<option>Japanese / Sushi</option>
+<option>Italian</option>
+<option>Mexican</option>
+<option>Indian</option>
+</select>
+</div>
+<!-- Rating -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant flex justify-between">
+<span>Minimum Rating</span>
+<span class="text-primary">4.2+</span>
+</label>
+<input class="w-full accent-primary-container bg-surface-variant rounded-full h-1 appearance-none" max="5" min="0" step="0.1" type="range" value="4.2"/>
+</div>
+<!-- Preferences -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Describe your vibe</label>
+<textarea class="w-full bg-[#0A0A0A] border border-white/10 rounded-lg p-sm text-on-background font-body-md focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors resize-none" placeholder="e.g., Cozy spot for a late night date, low lighting..." rows="4"></textarea>
+</div>
+<button class="w-full py-sm bg-primary-container text-white font-headline-md rounded-lg hover:bg-inverse-primary transition-colors mt-sm flex items-center justify-center gap-sm" onclick="document.getElementById('empty-state').classList.add('hidden'); document.getElementById('results-state').classList.remove('hidden');" type="button">
+<span class="material-symbols-outlined text-[24px]">psychology</span>
+                    Get AI Recommendations
+                </button>
+</form>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="ml-[30%] w-[70%] h-screen overflow-y-auto relative bg-background">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-40 flex justify-between items-center w-full px-xl py-md backdrop-blur-md bg-surface/80 border-b border-white/5">
+<div class="flex items-center gap-md">
+<h2 class="font-headline-md text-headline-md text-primary opacity-80">Discover</h2>
+</div>
+<div class="flex items-center gap-md text-on-surface-variant">
+<span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">search</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">notifications</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">settings</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">account_circle</span>
+</div>
+</header>
+<!-- Warning Banner -->
+<div class="hidden mx-xl mt-md bg-error-container/20 border border-error-container/50 rounded-lg p-sm flex items-center gap-sm text-error">
+<span class="material-symbols-outlined">warning</span>
+<span class="font-body-md text-sm">We couldn't find exact matches for your specific prompt. Here are the closest high-rated alternatives.</span>
+</div>
+<div class="p-xl pt-lg max-w-[1200px] mx-auto">
+<!-- Empty State -->
+<div class="flex flex-col items-center justify-center min-h-[60vh] text-center" id="empty-state">
+<div class="w-full max-w-[800px] mb-lg relative rounded-2xl overflow-hidden ai-border">
+<img class="w-full h-auto object-cover rounded-2xl" data-alt="High-quality, professional 3D isometric illustration of a modern kitchen with a robotic chef arm preparing a gourmet meal, vibrant lighting, Zomato Red and deep charcoal accents, dark background, premium empty state graphic for a food app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZqf8iolw807V49JFxsaGwitjV80kq3aaGHRMY70611kP17xG3zH0HZ8Ip9t2mk9GSzHUjYjwRPnWPJDRIORgvf3Tz7P9Cy4GhdWuNha_kHLJiwqOBWzFSC5OHWbtr7_VSkpxEhH5glYUBIRFdAvrQNH2VGUJis5RpVoavJNyguOIygKHKz9MbrVllJvarBoaj3EaQ7Li6nIu1nDizQLKkQjeJhY-EYB4SP5petG9nkLkLQcA_STFbkvCW5gzPIpXawQ2vTl5O4Q"/>
+</div>
+<h3 class="font-display-lg text-display-lg mb-sm text-on-background">Your Personal AI Concierge Awaits</h3>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">Tell me what you're craving, and I'll curate the perfect late-night culinary experience for you.</p>
+</div>
+<!-- Results State (Hidden by default) -->
+<div class="hidden flex flex-col gap-lg pb-xl" id="results-state">
+<div class="flex items-center gap-sm mb-sm">
+<span class="material-symbols-outlined text-primary">auto_awesome</span>
+<h3 class="font-headline-lg text-headline-lg">Top Picks for You</h3>
+</div>
+<!-- Card 1 -->
+<div class="glass-panel rounded-2xl overflow-hidden hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(203,32,45,0.1)] transition-all duration-300 grid grid-cols-12 gap-0 relative ai-border group">
+<div class="col-span-4 relative h-full min-h-[240px]">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="A cinematic, high-contrast shot of an upscale dimly lit sushi bar." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdgYh0WAw4regv3BA8Izng7UbdJJb2UdNPqUq3spPTN7EERzK4Y4cpn9jdGqGR8YZIgeLI6SCCfEF__-axvN-x2x7kikuX1JM5XvfbFeLH1IjmhQ2RRLvEWlEDmt0n8pELc4uSb836TIFJNc9yhj8CxJdnJN2vh5E2owrIW5JA3J7wVINrSFdLQiNBPJmaPR36a8wpwCV0aHoCdjatoDO8ODEAdNd2WAPuoKSVyFXUV4qEO5YCJuXFk2LTycfy2xjxgzXsb_IkKQ"/>
+<div class="absolute inset-0 bg-gradient-to-r from-transparent to-background/90"></div>
+<div class="absolute top-md left-md bg-primary-container text-white font-headline-md px-sm py-xs rounded-lg shadow-lg flex items-center justify-center">
+                            #1
+                        </div>
+</div>
+<div class="col-span-8 p-lg flex flex-col justify-center">
+<div class="flex justify-between items-start mb-sm">
+<div>
+<h4 class="font-headline-lg text-headline-lg mb-xs group-hover:text-primary transition-colors">Lumina Sushi Lounge</h4>
+<div class="flex gap-sm">
+<span class="px-sm py-xs rounded-full bg-surface-variant text-on-background font-label-sm">Japanese</span>
+<span class="px-sm py-xs rounded-full bg-surface-variant text-on-background font-label-sm">Late Night</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<div class="flex items-center gap-xs text-primary mb-xs">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-headline-md text-headline-md">4.9</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">$$$ • For Two</span>
+</div>
+</div>
+<div class="mt-md p-md glass-panel-elevated rounded-xl flex gap-md items-start">
+<span class="material-symbols-outlined text-tertiary mt-xs">lightbulb</span>
+<div>
+<h5 class="font-label-sm text-label-sm text-tertiary mb-xs uppercase tracking-wider">Why CraveAI recommends this</h5>
+<p class="font-body-md text-body-md text-on-background/80">Based on your preference for cozy vibes and high ratings, this spot offers the perfect intimate atmosphere. Matches your request for 'low lighting' perfectly. Known for exceptional late-night Omakase.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="glass-panel rounded-2xl overflow-hidden hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(203,32,45,0.1)] transition-all duration-300 grid grid-cols-12 gap-0 relative group border border-white/10">
+<div class="col-span-4 relative h-full min-h-[240px]">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="Dark, moody Italian restaurant interior." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBi08Me4LkyjgJ4iS2HuH4jTQe5MnAmdCewNnWssgp_gwkTMqAviNT6ALpm4TVtxIyKuq-rBUpSbczOzqKmLJiy5QuXKDYMSOa88d9pQe_fhxEmPWb7CvzyV5OzhsnfqjbT1qJBiiOt4RAbd8wNhOaMepxKxhtRxphvlMNa68owF9tKie69SdDJ1iaTcnjce4rAIVwRlsUKwqIsi5YrHEUlvxththw5XflQVYenH8vMLgRLOkPJK9G4BS6-s-KdxKj2DEnvHM_Rzw"/>
+<div class="absolute inset-0 bg-gradient-to-r from-transparent to-background/90"></div>
+<div class="absolute top-md left-md bg-surface-variant text-white font-headline-md px-sm py-xs rounded-lg shadow-lg flex items-center justify-center">
+                            #2
+                        </div>
+</div>
+<div class="col-span-8 p-lg flex flex-col justify-center">
+<div class="flex justify-between items-start mb-sm">
+<div>
+<h4 class="font-headline-lg text-headline-lg mb-xs group-hover:text-primary transition-colors">Nocturne Trattoria</h4>
+<div class="flex gap-sm">
+<span class="px-sm py-xs rounded-full bg-surface-variant text-on-background font-label-sm">Italian</span>
+<span class="px-sm py-xs rounded-full bg-surface-variant text-on-background font-label-sm">Wine Bar</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<div class="flex items-center gap-xs text-primary mb-xs">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-headline-md text-headline-md">4.7</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">$$ • For Two</span>
+</div>
+</div>
+<div class="mt-md p-md glass-panel-elevated rounded-xl flex gap-md items-start">
+<span class="material-symbols-outlined text-tertiary mt-xs">lightbulb</span>
+<div>
+<h5 class="font-label-sm text-label-sm text-tertiary mb-xs uppercase tracking-wider">Why CraveAI recommends this</h5>
+<p class="font-body-md text-body-md text-on-background/80">Excellent alternative if you're looking for a slightly more vibrant but still cozy atmosphere. The candlelight setting and robust wine list are highly praised by couples for late-night dates.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="glass-panel rounded-2xl overflow-hidden hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(203,32,45,0.1)] transition-all duration-300 grid grid-cols-12 gap-0 relative group border border-white/10">
+<div class="col-span-4 relative h-full min-h-[240px]">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="Sophisticated speakeasy style cocktail bar." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDasVzS8QPGJYCxHXiquF4Gj3zJ-xkEwLbY2RANDr6u9Rz8-q22_dawcaS2-DYRv143nbGpyZsHzsl8PBlR7OBRzGAyCiMvzqILRA2aSIz2b0Czh8KGmOa0rL2F2mcqkJHkFwa9ZszUfQjv48KEHeWolm16fxkengQnhJO-fC6HLzp1XaQymVdmyqRbGSY1CVjMwE-fsaTWTJnFaf1wgryXW47FLoqQGFJhOxgwLEMKIauI3ftjFP612jiro1aC3-Qj13EI2UGVXA"/>
+<div class="absolute inset-0 bg-gradient-to-r from-transparent to-background/90"></div>
+<div class="absolute top-md left-md bg-surface-variant text-white font-headline-md px-sm py-xs rounded-lg shadow-lg flex items-center justify-center">
+                            #3
+                        </div>
+</div>
+<div class="col-span-8 p-lg flex flex-col justify-center">
+<div class="flex justify-between items-start mb-sm">
+<div>
+<h4 class="font-headline-lg text-headline-lg mb-xs group-hover:text-primary transition-colors">The Velvet Room</h4>
+<div class="flex gap-sm">
+<span class="px-sm py-xs rounded-full bg-surface-variant text-on-background font-label-sm">Speakeasy</span>
+<span class="px-sm py-xs rounded-full bg-surface-variant text-on-background font-label-sm">Tapas</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<div class="flex items-center gap-xs text-primary mb-xs">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-headline-md text-headline-md">4.8</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">$$$ • For Two</span>
+</div>
+</div>
+<div class="mt-md p-md glass-panel-elevated rounded-xl flex gap-md items-start">
+<span class="material-symbols-outlined text-tertiary mt-xs">lightbulb</span>
+<div>
+<h5 class="font-label-sm text-label-sm text-tertiary mb-xs uppercase tracking-wider">Why CraveAI recommends this</h5>
+<p class="font-body-md text-body-md text-on-background/80">While primarily a cocktail lounge, their late-night tapas menu is phenomenal. The hidden entrance and velvet decor provide the ultimate exclusive, low-lit date night experience.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>
