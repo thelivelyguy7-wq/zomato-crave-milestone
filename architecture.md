@@ -6,7 +6,7 @@
 
 ## 1. Architecture Overview
 
-The system follows a **layered pipeline architecture**: ingest and normalize restaurant data once, accept user preferences at runtime, filter candidates deterministically, then delegate ranking and explanation to **Llama 3 70B** (via Groq API). This split keeps costs predictable (the LLM sees only a shortlist), improves latency, and grounds AI output in real dataset fields.
+The system follows a **layered pipeline architecture**: ingest and normalize restaurant data once, accept user prefeVrences at runtime, filter candidates deterministically, then delegate ranking and explanation to **Llama 3 70B** (via Groq API). This split keeps costs predictable (the LLM sees only a shortlist), improves latency, and grounds AI output in real dataset fields.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐

@@ -18,8 +18,8 @@ build/
 venv/
 ENV/
 
-# Data cache (downloaded dataset)
-data/
+# Data cache (downloaded dataset) - root-level only, not src/data/ source module
+/data/
 
 # IDE and OS
 .idea/

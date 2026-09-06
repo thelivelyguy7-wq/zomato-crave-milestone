@@ -4,7 +4,8 @@ from pydantic import BaseModel, Field, field_validator
 BudgetTier = Literal["low", "medium", "high"]
 
 class UserPreferences(BaseModel):
-    location: str = Field(..., min_length=1)
+    # Empty string means "no location filter" (i.e. search all areas).
+    location: str = Field(default="")
     budget: BudgetTier
     cuisine: Optional[str] = None
     min_rating: float = Field(default=0.0, ge=0.0, le=5.0)

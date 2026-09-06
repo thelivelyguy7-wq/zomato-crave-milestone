@@ -3,11 +3,12 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Zomato AI - Recommendations</title>
+    <title>CraveAI - Zomato Recommendations</title>
+    <meta name="description" content="AI-powered restaurant recommendations, personalized and explained."/>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    
+
     <script id="tailwind-config">
         tailwind.config = {
           darkMode: "class",
@@ -31,7 +32,7 @@
                   "error": "#ffb4ab",
                   "tertiary": "#80d0f8",
                   "surface-variant": "#343539",
-                  "on-surface-variant": "#e4bdbb",
+                  "on-surface-variant": "#c9c2c1",
                   "on-error": "#690005",
                   "surface-tint": "#ffb3af",
                   "secondary": "#c6c6c7",
@@ -42,7 +43,7 @@
                   "on-tertiary-fixed": "#001e2b",
                   "primary-container": "#cb202d",
                   "on-surface": "#e3e2e7",
-                  "outline": "#ab8886",
+                  "outline": "#8a7473",
                   "on-error-container": "#ffdad6",
                   "tertiary-fixed-dim": "#80d0f8",
                   "surface-container-high": "#292a2e",
@@ -76,6 +77,7 @@
         }
     </script>
     <style>
+        html, body { height: 100%; }
         .glass-panel {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(20px);
@@ -88,9 +90,7 @@
             -webkit-backdrop-filter: blur(40px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .ai-border {
-            position: relative;
-        }
+        .ai-border { position: relative; }
         .ai-border::before {
             content: '';
             position: absolute;
@@ -102,68 +102,113 @@
             -webkit-mask-composite: xor;
             mask-composite: exclude;
             pointer-events: none;
-            animation: rotateGradient 4s linear infinite;
         }
-        @keyframes rotateGradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #121317; }
         ::-webkit-scrollbar-thumb { background: #343539; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #454747; }
-        
-        .budget-btn.active {
-            background-color: rgba(255, 179, 175, 0.2);
+
+        .seg-btn.active {
+            background-color: rgba(255, 179, 175, 0.18);
             color: #ffb3af;
-            border: 1px solid rgba(255, 179, 175, 0.3);
+            border-color: rgba(255, 179, 175, 0.35);
         }
-        .budget-btn:not(.active) {
-            background-color: #343539;
+        .seg-btn:not(.active) {
+            background-color: #1e1f23;
             color: #e3e2e7;
-            border: 1px solid transparent;
+            border-color: transparent;
         }
+        .seg-btn { border-width: 1px; }
+        .seg-btn:focus-visible, .icon-btn:focus-visible, select:focus-visible, textarea:focus-visible, input:focus-visible, button:focus-visible {
+            outline: 2px solid #ffb3af;
+            outline-offset: 2px;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card-enter { animation: fadeInUp 0.45s ease both; }
+
+        @keyframes shimmer {
+            0% { background-position: -400px 0; }
+            100% { background-position: 400px 0; }
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #1e1f23 0%, #292a2e 50%, #1e1f23 100%);
+            background-size: 800px 100%;
+            animation: shimmer 1.4s infinite linear;
+        }
+
+        /* Drawer (mobile filters only — desktop sidebar must never be affected) */
+        #drawer-overlay { transition: opacity 0.25s ease; }
+        .drawer-closed #drawer-overlay { opacity: 0; pointer-events: none; }
+        @media (max-width: 767px) {
+            #drawer-panel { transition: transform 0.3s ease; }
+            .drawer-closed #drawer-panel { transform: translateX(-100%); }
+        }
+
+        .chip-suggestion:hover { border-color: rgba(255, 179, 175, 0.5); color: #ffb3af; }
     </style>
 </head>
-<body class="bg-background text-on-background min-h-screen flex overflow-hidden antialiased">
-    <!-- Side Nav Bar -->
-    <nav class="hidden md:flex flex-col h-screen overflow-y-auto w-[30%] fixed left-0 top-0 border-r border-white/10 backdrop-blur-xl bg-surface/50 p-6 gap-6 z-50">
-        <div class="pt-4">
-            <h1 class="font-headline-lg text-3xl font-bold text-primary tracking-tight">CraveAI</h1>
-            <p class="font-body-md text-on-surface-variant mt-1">Zomato AI Recommendations</p>
-        </div>
+<body class="bg-background text-on-background min-h-screen antialiased">
+<div id="drawer-root" class="drawer-closed">
 
-        <div class="mt-auto glass-panel rounded-2xl p-6">
-            <h2 class="font-headline-md text-2xl mb-6">Refine Craving</h2>
-            <form id="preference-form" class="flex flex-col gap-5">
-                
+    <!-- Mobile drawer overlay -->
+    <div id="drawer-overlay" class="fixed inset-0 bg-black/60 z-40 md:hidden" onclick="closeDrawer()"></div>
+
+    <div class="flex min-h-screen">
+        <!-- Side Nav / Filters -->
+        <nav id="drawer-panel"
+             class="fixed md:sticky top-0 left-0 h-screen overflow-y-auto w-[85%] max-w-[360px] md:w-[360px] md:shrink-0 border-r border-white/10 bg-surface md:bg-surface/50 backdrop-blur-xl p-6 gap-6 z-50 flex flex-col">
+            <div class="flex items-center justify-between pt-1">
+                <div>
+                    <h1 class="font-headline-lg text-2xl font-bold text-primary tracking-tight">CraveAI</h1>
+                    <p class="font-body-md text-sm text-on-surface-variant mt-1">Zomato AI Recommendations</p>
+                </div>
+                <button class="icon-btn md:hidden text-on-surface-variant hover:text-primary p-1" onclick="closeDrawer()" aria-label="Close filters">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="glass-panel rounded-2xl p-5 flex flex-col gap-1">
+                <div id="meta-status" class="flex items-center gap-2 text-xs text-on-surface-variant">
+                    <span class="w-1.5 h-1.5 rounded-full bg-outline animate-pulse"></span>
+                    <span id="meta-status-text">Loading restaurant data…</span>
+                </div>
+            </div>
+
+            <form id="preference-form" class="glass-panel rounded-2xl p-5 flex flex-col gap-5" novalidate>
+                <h2 class="font-headline-md text-xl">Refine Craving</h2>
+
                 <div class="flex flex-col gap-2">
-                    <label class="font-label-sm text-xs text-on-surface-variant">Location *</label>
-                    <select id="location-select" required class="w-full bg-[#0A0A0A] border border-white/10 rounded-lg p-3 text-on-background focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors">
-                        <option value="">Loading...</option>
+                    <label for="location-select" class="font-label-sm text-xs text-on-surface-variant">Location</label>
+                    <select id="location-select"
+                            class="w-full bg-[#0A0A0A] border border-white/10 rounded-lg p-3 text-on-background focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors disabled:opacity-50">
+                        <option value="">Loading…</option>
                     </select>
                 </div>
 
                 <div class="flex flex-col gap-2">
-                    <label class="font-label-sm text-xs text-on-surface-variant">Cuisine</label>
-                    <select id="cuisine-select" class="w-full bg-[#0A0A0A] border border-white/10 rounded-lg p-3 text-on-background focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors">
-                        <option value="">Any Cuisine</option>
+                    <label for="cuisine-select" class="font-label-sm text-xs text-on-surface-variant">Cuisine</label>
+                    <select id="cuisine-select"
+                            class="w-full bg-[#0A0A0A] border border-white/10 rounded-lg p-3 text-on-background focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors disabled:opacity-50">
+                        <option value="">Any cuisine</option>
                     </select>
                 </div>
 
                 <div class="flex flex-col gap-2">
                     <label class="font-label-sm text-xs text-on-surface-variant">Budget Tier *</label>
-                    <div class="flex gap-2">
-                        <button type="button" class="budget-btn flex-1 py-2 rounded-full font-label-sm transition-colors" data-value="low">Low</button>
-                        <button type="button" class="budget-btn active flex-1 py-2 rounded-full font-label-sm transition-colors" data-value="medium">Med</button>
-                        <button type="button" class="budget-btn flex-1 py-2 rounded-full font-label-sm transition-colors" data-value="high">High</button>
+                    <div class="flex gap-2" id="budget-group" role="radiogroup" aria-label="Budget tier">
+                        <button type="button" role="radio" aria-checked="false" class="seg-btn flex-1 py-2 rounded-full font-label-sm transition-colors" data-value="low">Low</button>
+                        <button type="button" role="radio" aria-checked="true" class="seg-btn active flex-1 py-2 rounded-full font-label-sm transition-colors" data-value="medium">Med</button>
+                        <button type="button" role="radio" aria-checked="false" class="seg-btn flex-1 py-2 rounded-full font-label-sm transition-colors" data-value="high">High</button>
                     </div>
                     <input type="hidden" id="budget-input" value="medium">
                 </div>
 
                 <div class="flex flex-col gap-2">
-                    <label class="font-label-sm text-xs text-on-surface-variant flex justify-between">
+                    <label for="rating-input" class="font-label-sm text-xs text-on-surface-variant flex justify-between">
                         <span>Minimum Rating</span>
                         <span class="text-primary" id="rating-val">4.0+</span>
                     </label>
@@ -171,216 +216,347 @@
                 </div>
 
                 <div class="flex flex-col gap-2">
-                    <label class="font-label-sm text-xs text-on-surface-variant">Describe your vibe</label>
-                    <textarea id="prefs-input" class="w-full bg-[#0A0A0A] border border-white/10 rounded-lg p-3 text-on-background focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors resize-none" placeholder="e.g., Cozy spot for a late night date..." rows="2"></textarea>
+                    <label class="font-label-sm text-xs text-on-surface-variant"># of Picks</label>
+                    <div class="flex gap-2" id="topk-group" role="radiogroup" aria-label="Number of results">
+                        <button type="button" role="radio" aria-checked="false" class="seg-btn flex-1 py-2 rounded-full font-label-sm transition-colors" data-value="3">3</button>
+                        <button type="button" role="radio" aria-checked="true" class="seg-btn active flex-1 py-2 rounded-full font-label-sm transition-colors" data-value="5">5</button>
+                        <button type="button" role="radio" aria-checked="false" class="seg-btn flex-1 py-2 rounded-full font-label-sm transition-colors" data-value="8">8</button>
+                    </div>
+                    <input type="hidden" id="topk-input" value="5">
                 </div>
 
-                <button id="submit-btn" type="submit" class="w-full py-3 bg-primary-container text-white font-label-md rounded-lg hover:bg-inverse-primary transition-colors mt-2 flex items-center justify-center gap-2">
-                    <span class="material-symbols-outlined text-[18px]">psychology</span>
-                    Get AI Recommendations
-                </button>
+                <div class="flex flex-col gap-2">
+                    <label for="prefs-input" class="font-label-sm text-xs text-on-surface-variant">Describe your vibe</label>
+                    <textarea id="prefs-input" maxlength="500"
+                              class="w-full bg-[#0A0A0A] border border-white/10 rounded-lg p-3 text-on-background focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors resize-none"
+                              placeholder="e.g., Cozy spot for a late night date…" rows="2"></textarea>
+                    <div class="flex flex-wrap gap-2 mt-1">
+                        <button type="button" class="chip-suggestion text-xs px-3 py-1 rounded-full border border-white/10 text-on-surface-variant transition-colors">Birthday dinner</button>
+                        <button type="button" class="chip-suggestion text-xs px-3 py-1 rounded-full border border-white/10 text-on-surface-variant transition-colors">Quick solo lunch</button>
+                        <button type="button" class="chip-suggestion text-xs px-3 py-1 rounded-full border border-white/10 text-on-surface-variant transition-colors">Family friendly</button>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 mt-1">
+                    <button id="submit-btn" type="submit"
+                            class="flex-1 py-3 bg-primary-container text-white font-label-md rounded-lg hover:bg-inverse-primary transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+                        <span id="submit-icon" class="material-symbols-outlined text-[18px]">psychology</span>
+                        <span id="submit-label">Get AI Recommendations</span>
+                    </button>
+                    <button id="reset-btn" type="button" title="Reset filters" aria-label="Reset filters"
+                            class="icon-btn px-3 rounded-lg border border-white/10 text-on-surface-variant hover:text-primary hover:border-primary/40 transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">refresh</span>
+                    </button>
+                </div>
             </form>
-        </div>
-    </nav>
+        </nav>
 
-    <!-- Main Content Area -->
-    <main class="ml-[30%] w-[70%] h-screen overflow-y-auto relative bg-[#0A0A0A]">
-        <header class="sticky top-0 z-40 flex justify-between items-center w-full px-12 py-6 backdrop-blur-md bg-surface/80 border-b border-white/5">
-            <h2 class="font-headline-md text-2xl text-primary opacity-80">Discover</h2>
-            <div class="flex items-center gap-6 text-on-surface-variant">
-                <span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">search</span>
-                <span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">notifications</span>
-                <span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">settings</span>
-                <span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">account_circle</span>
-            </div>
-        </header>
-
-        <div id="fallback-banner" class="hidden mx-12 mt-6 bg-error-container/20 border border-error-container/50 rounded-lg p-4 flex items-center gap-3 text-error">
-            <span class="material-symbols-outlined">warning</span>
-            <span id="fallback-text" class="font-body-md text-sm">AI Engine unavailable. Showing standard recommendations.</span>
-        </div>
-
-        <div class="p-12 max-w-[1200px] mx-auto">
-            <!-- Empty State -->
-            <div id="empty-state" class="flex flex-col items-center justify-center h-[60vh] text-center">
-                <div class="w-64 h-64 mb-10 relative ai-border rounded-full p-1">
-                    <img class="w-full h-full object-cover rounded-full filter brightness-90 contrast-125" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+        <!-- Main Content Area -->
+        <main class="flex-1 min-h-screen relative bg-[#0A0A0A]">
+            <header class="sticky top-0 z-30 flex justify-between items-center w-full px-5 md:px-12 py-4 md:py-6 backdrop-blur-md bg-surface/80 border-b border-white/5">
+                <div class="flex items-center gap-3">
+                    <button class="icon-btn md:hidden text-on-surface-variant hover:text-primary p-1" onclick="openDrawer()" aria-label="Open filters">
+                        <span class="material-symbols-outlined">tune</span>
+                    </button>
+                    <h2 class="font-headline-md text-xl md:text-2xl text-primary opacity-90">Discover</h2>
                 </div>
-                <h3 class="font-display-lg text-4xl mb-4 text-on-background">Your Personal AI Concierge</h3>
-                <p class="font-body-lg text-lg text-on-surface-variant max-w-lg">Tell me what you're craving, and I'll curate the perfect culinary experience.</p>
+                <span id="results-count" class="hidden text-xs md:text-sm text-on-surface-variant bg-surface-container px-3 py-1.5 rounded-full"></span>
+            </header>
+
+            <div id="fallback-banner" class="hidden mx-5 md:mx-12 mt-6 bg-error-container/20 border border-error-container/50 rounded-lg p-4 flex items-center gap-3 text-error">
+                <span class="material-symbols-outlined shrink-0">warning</span>
+                <span id="fallback-text" class="font-body-md text-sm">AI engine unavailable right now — showing standard rating-based picks instead.</span>
             </div>
 
-            <!-- Loading State -->
-            <div id="loading-state" class="hidden flex flex-col items-center justify-center h-[60vh] text-center">
-                <div class="w-16 h-16 border-4 border-white/10 border-t-primary rounded-full animate-spin mb-4"></div>
-                <p class="text-on-surface-variant">AI is thinking...</p>
+            <div id="error-banner" class="hidden mx-5 md:mx-12 mt-6 bg-error-container/20 border border-error-container/50 rounded-lg p-4 flex items-center gap-3 text-error">
+                <span class="material-symbols-outlined shrink-0">error</span>
+                <span id="error-text" class="font-body-md text-sm flex-1">Something went wrong.</span>
+                <button id="error-retry-btn" class="text-xs font-label-md px-3 py-1.5 rounded-lg bg-error-container/40 hover:bg-error-container/60 transition-colors shrink-0">Retry</button>
             </div>
 
-            <!-- Results State -->
-            <div id="results-state" class="hidden flex flex-col gap-10 pb-24">
-                <div class="flex items-center gap-3 mb-4">
-                    <span class="material-symbols-outlined text-primary">auto_awesome</span>
-                    <h3 class="font-headline-lg text-3xl">Top Picks for You</h3>
+            <div class="p-5 md:p-12 max-w-[1200px] mx-auto">
+                <!-- Empty State -->
+                <div id="empty-state" class="flex flex-col items-center justify-center min-h-[60vh] text-center">
+                    <div class="w-40 h-40 md:w-56 md:h-56 mb-8 relative ai-border rounded-full p-1">
+                        <div class="w-full h-full rounded-full bg-surface-container flex items-center justify-center">
+                            <span class="material-symbols-outlined text-tertiary" style="font-size: 72px;">restaurant</span>
+                        </div>
+                    </div>
+                    <h3 class="font-display-lg text-2xl md:text-4xl mb-4 text-on-background">Your Personal AI Concierge</h3>
+                    <p class="font-body-lg text-base md:text-lg text-on-surface-variant max-w-lg">Set your craving on the left, and I'll curate the perfect pick — with a real reason for each one.</p>
                 </div>
-                <p id="summary-text" class="text-on-surface-variant mb-4"></p>
-                
-                <div id="results-container" class="flex flex-col gap-6">
-                    <!-- Cards injected here -->
-                </div>
-            </div>
-        </div>
-    </main>
 
-    <!-- Template for Restaurant Card -->
-    <template id="card-template">
-        <div class="glass-panel rounded-2xl overflow-hidden hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(203,32,45,0.1)] transition-all duration-300 relative ai-border group p-8">
-            <div class="absolute top-6 left-6 bg-primary-container text-white font-headline-md px-3 py-1 rounded-lg shadow-lg">
-                <span class="card-rank">#1</span>
-            </div>
-            
-            <!-- We pushed the content right to make room for the rank badge -->
-            <div class="ml-16 flex justify-between items-start mb-4">
-                <div>
-                    <h4 class="card-name font-headline-lg text-2xl mb-2 group-hover:text-primary transition-colors">Restaurant Name</h4>
-                    <div class="flex gap-3">
-                        <span class="card-cuisine px-3 py-1 rounded-full bg-surface-variant text-on-background text-sm">Cuisine</span>
-                        <span class="card-location px-3 py-1 rounded-full bg-surface-variant text-on-background text-sm">Location</span>
+                <!-- Loading State (skeleton cards) -->
+                <div id="loading-state" class="hidden flex flex-col gap-4 pb-24" aria-busy="true" aria-live="polite">
+                    <div class="flex items-center gap-3 text-on-surface-variant mb-2">
+                        <div class="w-5 h-5 border-2 border-white/10 border-t-primary rounded-full animate-spin"></div>
+                        <span>AI is thinking…</span>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="skeleton rounded-2xl h-44"></div>
+                        <div class="skeleton rounded-2xl h-44"></div>
+                        <div class="skeleton rounded-2xl h-44"></div>
+                        <div class="skeleton rounded-2xl h-44"></div>
                     </div>
                 </div>
-                <div class="flex flex-col items-end">
-                    <div class="flex items-center gap-1 text-primary mb-1">
-                        <span class="material-symbols-outlined">star</span>
-                        <span class="card-rating font-headline-md text-2xl">4.9</span>
+
+                <!-- No Results State -->
+                <div id="no-results-state" class="hidden flex flex-col items-center justify-center min-h-[50vh] text-center">
+                    <span class="material-symbols-outlined text-on-surface-variant mb-4" style="font-size: 56px;">search_off</span>
+                    <h3 class="font-headline-lg text-2xl mb-3">No matches for that combination</h3>
+                    <p class="text-on-surface-variant max-w-md">Try loosening the minimum rating, switching budget tier, or clearing the cuisine filter.</p>
+                </div>
+
+                <!-- Results State -->
+                <div id="results-state" class="hidden flex flex-col gap-6 pb-24">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary">auto_awesome</span>
+                        <h3 class="font-headline-lg text-2xl md:text-3xl">Top Picks for You</h3>
                     </div>
-                    <span class="card-cost text-sm text-on-surface-variant">₹500 • For Two</span>
+                    <p id="summary-text" class="text-on-surface-variant -mt-3"></p>
+
+                    <div id="results-container" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Cards injected here -->
+                    </div>
                 </div>
             </div>
-            
-            <div class="ml-16 mt-6 p-5 glass-panel-elevated rounded-xl flex gap-4 items-start">
-                <span class="material-symbols-outlined text-tertiary mt-1">psychology</span>
-                <div>
-                    <h5 class="text-xs text-tertiary mb-2 uppercase tracking-wider font-bold">Why AI Chose This</h5>
-                    <p class="card-explanation text-on-background/80">Explanation goes here.</p>
+        </main>
+    </div>
+</div>
+
+<!-- Template for Restaurant Card -->
+<template id="card-template">
+    <div class="card-enter glass-panel rounded-2xl overflow-hidden hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(203,32,45,0.15)] transition-all duration-300 relative ai-border group p-6 md:p-7 flex flex-col">
+        <div class="flex justify-between items-start gap-3 mb-4">
+            <div class="flex items-start gap-3 min-w-0">
+                <div class="shrink-0 bg-primary-container text-white font-headline-md px-2.5 py-1 rounded-lg text-sm">
+                    <span class="card-rank">#1</span>
                 </div>
+                <div class="min-w-0">
+                    <h4 class="card-name font-headline-lg text-lg md:text-xl mb-2 group-hover:text-primary transition-colors truncate">Restaurant Name</h4>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="card-cuisine px-2.5 py-0.5 rounded-full bg-surface-variant text-on-background text-xs truncate max-w-[220px]">Cuisine</span>
+                        <span class="card-location px-2.5 py-0.5 rounded-full bg-surface-variant text-on-background text-xs">Location</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col items-end shrink-0">
+                <div class="flex items-center gap-1 text-primary mb-1">
+                    <span class="material-symbols-outlined text-[18px]">star</span>
+                    <span class="card-rating font-headline-md text-lg">4.9</span>
+                </div>
+                <span class="card-cost text-xs text-on-surface-variant whitespace-nowrap">₹500 for two</span>
             </div>
         </div>
-    </template>
 
-    <script>
-        const API_BASE = "http://127.0.0.1:8000";
+        <div class="mt-auto p-4 glass-panel-elevated rounded-xl flex gap-3 items-start">
+            <span class="material-symbols-outlined text-tertiary mt-0.5 text-[18px]">psychology</span>
+            <div class="min-w-0">
+                <h5 class="text-[10px] text-tertiary mb-1.5 uppercase tracking-wider font-bold">Why AI Chose This</h5>
+                <p class="card-explanation text-sm text-on-background/80 leading-relaxed">Explanation goes here.</p>
+            </div>
+        </div>
+    </div>
+</template>
 
-        // Budget buttons logic
-        document.querySelectorAll('.budget-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.budget-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                document.getElementById('budget-input').value = e.target.dataset.value;
+<script>
+    // Same-origin by default (works when served from FastAPI's /app mount regardless
+    // of which port it's bound to); falls back to localhost:8000 only when opened
+    // directly as a local file.
+    const API_BASE = window.location.protocol.startsWith('http') ? '' : 'http://127.0.0.1:8000';
+
+    const drawerRoot = document.getElementById('drawer-root');
+    function openDrawer() { drawerRoot.classList.remove('drawer-closed'); document.body.style.overflow = 'hidden'; }
+    function closeDrawer() { drawerRoot.classList.add('drawer-closed'); document.body.style.overflow = ''; }
+
+    function setupSegmentGroup(groupId, hiddenInputId) {
+        const group = document.getElementById(groupId);
+        const hidden = document.getElementById(hiddenInputId);
+        group.querySelectorAll('.seg-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                group.querySelectorAll('.seg-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-checked', 'false'); });
+                btn.classList.add('active');
+                btn.setAttribute('aria-checked', 'true');
+                hidden.value = btn.dataset.value;
             });
         });
+    }
+    setupSegmentGroup('budget-group', 'budget-input');
+    setupSegmentGroup('topk-group', 'topk-input');
 
-        // Rating slider logic
-        const ratingInput = document.getElementById('rating-input');
-        const ratingVal = document.getElementById('rating-val');
-        ratingInput.addEventListener('input', (e) => {
-            ratingVal.textContent = parseFloat(e.target.value).toFixed(1) + '+';
+    // Rating slider
+    const ratingInput = document.getElementById('rating-input');
+    const ratingVal = document.getElementById('rating-val');
+    ratingInput.addEventListener('input', (e) => {
+        ratingVal.textContent = parseFloat(e.target.value).toFixed(1) + '+';
+    });
+
+    // Vibe suggestion chips
+    document.querySelectorAll('.chip-suggestion').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.getElementById('prefs-input').value = chip.textContent.trim();
         });
+    });
 
-        // Fetch Metadata
-        async function fetchMetadata() {
-            try {
-                const [locRes, cuiRes] = await Promise.all([
-                    fetch(`${API_BASE}/locations`),
-                    fetch(`${API_BASE}/cuisines`)
-                ]);
-                
-                const locData = await locRes.json();
-                const locSelect = document.getElementById('location-select');
-                locSelect.innerHTML = '<option value="">Select Location</option>';
-                locData.locations.forEach(loc => {
-                    locSelect.innerHTML += `<option value="${loc}">${loc}</option>`;
-                });
+    // Reset filters
+    document.getElementById('reset-btn').addEventListener('click', () => {
+        document.getElementById('location-select').selectedIndex = 0;
+        document.getElementById('cuisine-select').selectedIndex = 0;
+        document.getElementById('prefs-input').value = '';
+        ratingInput.value = 4.0;
+        ratingVal.textContent = '4.0+';
+        document.querySelectorAll('#budget-group .seg-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('#budget-group .seg-btn[data-value="medium"]').classList.add('active');
+        document.getElementById('budget-input').value = 'medium';
+        document.querySelectorAll('#topk-group .seg-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('#topk-group .seg-btn[data-value="5"]').classList.add('active');
+        document.getElementById('topk-input').value = '5';
+    });
 
-                const cuiData = await cuiRes.json();
-                const cuiSelect = document.getElementById('cuisine-select');
-                cuiSelect.innerHTML = '<option value="">Any Cuisine</option>';
-                cuiData.cuisines.forEach(cui => {
-                    cuiSelect.innerHTML += `<option value="${cui}">${cui}</option>`;
-                });
-            } catch (err) {
-                console.error("Failed to fetch metadata", err);
-                document.getElementById('location-select').innerHTML = '<option value="Bangalore">Bangalore</option>';
-            }
+    function showState(name) {
+        ['empty-state', 'loading-state', 'no-results-state', 'results-state'].forEach(id => {
+            document.getElementById(id).classList.toggle('hidden', id !== name);
+        });
+    }
+
+    function setMetaStatus(text, ok) {
+        document.getElementById('meta-status-text').textContent = text;
+        document.querySelector('#meta-status span.rounded-full').className =
+            'w-1.5 h-1.5 rounded-full ' + (ok ? 'bg-tertiary' : 'bg-error animate-pulse');
+    }
+
+    async function fetchMetadata() {
+        try {
+            const [locRes, cuiRes] = await Promise.all([
+                fetch(`${API_BASE}/locations`),
+                fetch(`${API_BASE}/cuisines`)
+            ]);
+            if (!locRes.ok || !cuiRes.ok) throw new Error('Metadata request failed');
+
+            const locData = await locRes.json();
+            const locSelect = document.getElementById('location-select');
+            locSelect.innerHTML = '<option value="">Bengaluru (All)</option>';
+            locData.locations.forEach(loc => {
+                locSelect.innerHTML += `<option value="${loc}">${loc}</option>`;
+            });
+
+            const cuiData = await cuiRes.json();
+            const cuiSelect = document.getElementById('cuisine-select');
+            cuiSelect.innerHTML = '<option value="">Any cuisine</option>';
+            cuiData.cuisines.forEach(cui => {
+                cuiSelect.innerHTML += `<option value="${cui}">${cui}</option>`;
+            });
+
+            setMetaStatus(`${locData.locations.length} locations · ${cuiData.cuisines.length} cuisines loaded`, true);
+        } catch (err) {
+            console.error('Failed to fetch metadata', err);
+            setMetaStatus('Could not reach the backend. Is the API running?', false);
+            document.getElementById('location-select').innerHTML = '<option value="">Unavailable</option>';
+            document.getElementById('location-select').disabled = true;
+            document.getElementById('cuisine-select').disabled = true;
         }
+    }
 
-        // Handle Form Submit
-        document.getElementById('preference-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const location = document.getElementById('location-select').value;
-            if (!location) { alert("Please select a location."); return; }
+    function setSubmitting(isSubmitting) {
+        const btn = document.getElementById('submit-btn');
+        const icon = document.getElementById('submit-icon');
+        const label = document.getElementById('submit-label');
+        btn.disabled = isSubmitting;
+        icon.textContent = isSubmitting ? 'progress_activity' : 'psychology';
+        icon.classList.toggle('animate-spin', isSubmitting);
+        label.textContent = isSubmitting ? 'Thinking…' : 'Get AI Recommendations';
+    }
 
-            const payload = {
-                location: location,
-                budget: document.getElementById('budget-input').value,
-                cuisine: document.getElementById('cuisine-select').value || null,
-                min_rating: parseFloat(document.getElementById('rating-input').value),
-                additional_preferences: document.getElementById('prefs-input').value || null,
-                top_k: 5
-            };
+    async function runSearch() {
+        const location = document.getElementById('location-select').value;
+        const locationLabel = location || 'Bengaluru';
 
-            // UI State
-            document.getElementById('empty-state').classList.add('hidden');
-            document.getElementById('results-state').classList.add('hidden');
-            document.getElementById('fallback-banner').classList.add('hidden');
-            document.getElementById('loading-state').classList.remove('hidden');
+        const payload = {
+            location: location,
+            budget: document.getElementById('budget-input').value,
+            cuisine: document.getElementById('cuisine-select').value || null,
+            min_rating: parseFloat(document.getElementById('rating-input').value),
+            additional_preferences: document.getElementById('prefs-input').value || null,
+            top_k: parseInt(document.getElementById('topk-input').value, 10)
+        };
 
-            try {
-                const res = await fetch(`${API_BASE}/recommendations`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                if (!res.ok) throw new Error("API Error");
-                
-                const data = await res.json();
-                
-                // Hide loading
-                document.getElementById('loading-state').classList.add('hidden');
-                
-                if (data.fallback_used) {
-                    document.getElementById('fallback-banner').classList.remove('hidden');
-                }
-                
-                document.getElementById('summary-text').textContent = data.summary || "";
-                
-                const container = document.getElementById('results-container');
-                container.innerHTML = "";
-                const template = document.getElementById('card-template');
+        document.getElementById('fallback-banner').classList.add('hidden');
+        document.getElementById('error-banner').classList.add('hidden');
+        document.getElementById('results-count').classList.add('hidden');
+        setSubmitting(true);
+        showState('loading-state');
+        closeDrawer();
 
-                data.recommendations.forEach((rec, idx) => {
-                    const clone = template.content.cloneNode(true);
-                    clone.querySelector('.card-rank').textContent = '#' + rec.rank;
-                    clone.querySelector('.card-name').textContent = rec.restaurant.name;
-                    clone.querySelector('.card-cuisine').textContent = rec.restaurant.cuisine;
-                    clone.querySelector('.card-location').textContent = rec.restaurant.location;
-                    clone.querySelector('.card-rating').textContent = rec.restaurant.rating;
-                    clone.querySelector('.card-cost').textContent = `₹${rec.restaurant.cost_for_two} • For Two`;
-                    clone.querySelector('.card-explanation').textContent = rec.explanation;
-                    container.appendChild(clone);
-                });
+        try {
+            const res = await fetch(`${API_BASE}/recommendations`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
 
-                document.getElementById('results-state').classList.remove('hidden');
-            } catch (err) {
-                console.error(err);
-                document.getElementById('loading-state').classList.add('hidden');
-                document.getElementById('empty-state').classList.remove('hidden');
-                alert("An error occurred while fetching recommendations.");
+            if (!res.ok) {
+                const body = await res.json().catch(() => ({}));
+                throw new Error(body.detail || `Request failed (${res.status})`);
             }
-        });
 
-        // Init
-        fetchMetadata();
-    </script>
+            const data = await res.json();
+
+            if (data.fallback_used) {
+                document.getElementById('fallback-banner').classList.remove('hidden');
+            }
+
+            if (!data.recommendations || data.recommendations.length === 0) {
+                showState('no-results-state');
+                return;
+            }
+
+            document.getElementById('summary-text').textContent = data.summary || '';
+
+            const container = document.getElementById('results-container');
+            container.innerHTML = '';
+            const template = document.getElementById('card-template');
+
+            data.recommendations.forEach((rec, idx) => {
+                const clone = template.content.cloneNode(true);
+                const card = clone.querySelector('div');
+                card.style.animationDelay = `${idx * 60}ms`;
+                clone.querySelector('.card-rank').textContent = '#' + rec.rank;
+                clone.querySelector('.card-name').textContent = rec.restaurant.name;
+                clone.querySelector('.card-name').title = rec.restaurant.name;
+                clone.querySelector('.card-cuisine').textContent = rec.restaurant.cuisine;
+                clone.querySelector('.card-cuisine').title = rec.restaurant.cuisine;
+                clone.querySelector('.card-location').textContent = rec.restaurant.location;
+                clone.querySelector('.card-rating').textContent = rec.restaurant.rating;
+                clone.querySelector('.card-cost').textContent = `₹${rec.restaurant.cost_for_two} for two`;
+                clone.querySelector('.card-explanation').textContent = rec.explanation;
+                container.appendChild(clone);
+            });
+
+            const resultsCount = document.getElementById('results-count');
+            resultsCount.textContent = `${data.recommendations.length} picks in ${locationLabel}`;
+            resultsCount.classList.remove('hidden');
+
+            showState('results-state');
+        } catch (err) {
+            console.error(err);
+            document.getElementById('error-text').textContent =
+                err.message === 'Failed to fetch'
+                    ? "Can't reach the recommendation service. Check the API is running and try again."
+                    : err.message;
+            document.getElementById('error-banner').classList.remove('hidden');
+            showState('empty-state');
+        } finally {
+            setSubmitting(false);
+        }
+    }
+
+    document.getElementById('preference-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        runSearch();
+    });
+    document.getElementById('error-retry-btn').addEventListener('click', runSearch);
+
+    fetchMetadata();
+</script>
 </body>
 </html>

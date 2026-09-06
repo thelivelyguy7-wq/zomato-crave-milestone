@@ -2,7 +2,7 @@ import pytest
 from src.models.restaurant import Restaurant
 from src.models.preferences import UserPreferences
 from src.services.filter import RestaurantFilter
-from src.config import Settings
+from src.config import Settings, get_settings
 
 @pytest.fixture
 def sample_restaurants():
@@ -17,7 +17,11 @@ def sample_restaurants():
 @pytest.fixture
 def filter_service(monkeypatch):
     monkeypatch.setenv("MAX_CANDIDATES", "3")
-    return RestaurantFilter()
+    # get_settings() is lru_cache'd, so a prior test's cached instance would
+    # otherwise shadow this env override.
+    get_settings.cache_clear()
+    yield RestaurantFilter()
+    get_settings.cache_clear()
 
 def test_filter_location(sample_restaurants, filter_service):
     prefs = UserPreferences(location="Delhi", budget="medium")

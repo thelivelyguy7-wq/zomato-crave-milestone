@@ -49,8 +49,10 @@ def test_temperature_clamped():
     assert settings_high.llm_temperature == 2.0
 
 
-def test_get_settings_does_not_crash_without_api_key():
+def test_get_settings_does_not_crash_without_api_key(monkeypatch):
     """get_settings() must not raise when GROQ_API_KEY is unset."""
+    monkeypatch.setenv("GROQ_API_KEY", "")
     get_settings.cache_clear()
     settings = get_settings()
-    assert settings.llm_model == "llama3-70b-8192"
+    assert settings.has_api_key is False
+    assert settings.groq_api_key is None
