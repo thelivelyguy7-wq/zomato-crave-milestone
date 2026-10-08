@@ -79,4 +79,4 @@ Present top recommendations in a user-friendly format:
 
 ## Source Document
 
-This context is derived from `docs/problemstatement.txt` — Problem Statement: AI-Powered Restaurant Recommendation System (Zomato Use Case).
+This context is derived from [problemstatement.md](./problemstatement.md) — Problem Statement: AI-Powered Restaurant Recommendation System (Zomato Use Case).

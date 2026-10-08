@@ -4,6 +4,7 @@ Zomato-inspired restaurant recommendations combining structured Hugging Face dat
 
 ## Documentation
 
+- [problemstatement.md](./problemstatement.md) — problem statement
 - [context.md](./context.md) — product requirements
 - [architecture.md](./architecture.md) — system design
 - [implementation-plan.md](./implementation-plan.md) — phased build plan

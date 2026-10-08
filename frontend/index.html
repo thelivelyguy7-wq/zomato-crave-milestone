@@ -6,7 +6,7 @@
     <title>CraveAI - Zomato Recommendations</title>
     <meta name="description" content="AI-powered restaurant recommendations, personalized and explained."/>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 
     <script id="tailwind-config">
@@ -64,11 +64,11 @@
                   "on-tertiary": "#003548"
               },
               fontFamily: {
-                  "headline-lg": ["Sora"],
+                  "headline-lg": ["Outfit", "sans-serif"],
                   "body-md": ["Inter"],
                   "label-sm": ["Inter"],
-                  "headline-md": ["Sora"],
-                  "display-lg": ["Sora"],
+                  "headline-md": ["Outfit", "sans-serif"],
+                  "display-lg": ["Outfit", "sans-serif"],
                   "label-md": ["Inter"],
                   "body-lg": ["Inter"]
               }
@@ -77,19 +77,45 @@
         }
     </script>
     <style>
-        html, body { height: 100%; }
+        html, body { height: 100%; background-color: #050505; }
+        /* Background Glow Orbs */
+        .bg-glow {
+            position: fixed;
+            width: 60vw;
+            height: 60vw;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: -1;
+            opacity: 0.15;
+            pointer-events: none;
+            animation: float 20s infinite alternate ease-in-out;
+        }
+        .bg-glow-1 { top: -20%; left: -10%; background: #cb202d; }
+        .bg-glow-2 { bottom: -20%; right: -10%; background: #007195; }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(5%, 5%) scale(1.1); }
+        }
+
         .glass-panel {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
         .glass-panel-elevated {
-            background: rgba(255, 255, 255, 0.08);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 100%);
             backdrop-filter: blur(40px);
             -webkit-backdrop-filter: blur(40px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            border-left: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
         }
+        
         .ai-border { position: relative; }
         .ai-border::before {
             content: '';
@@ -97,74 +123,126 @@
             inset: -1px;
             border-radius: inherit;
             padding: 1px;
-            background: linear-gradient(45deg, #cb202d, #80d0f8);
+            background: linear-gradient(135deg, rgba(203,32,45,0.8), rgba(128,208,248,0.8), rgba(203,32,45,0.2));
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
             mask-composite: exclude;
             pointer-events: none;
+            opacity: 0.6;
+            transition: opacity 0.3s ease;
         }
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #121317; }
-        ::-webkit-scrollbar-thumb { background: #343539; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #454747; }
+        .ai-border:hover::before { opacity: 1; }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
 
+        .seg-btn { 
+            border-width: 1px; 
+            border-color: rgba(255,255,255,0.05); 
+            background: rgba(255,255,255,0.02);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
         .seg-btn.active {
-            background-color: rgba(255, 179, 175, 0.18);
+            background: linear-gradient(135deg, rgba(203, 32, 45, 0.2), rgba(203, 32, 45, 0.05));
             color: #ffb3af;
-            border-color: rgba(255, 179, 175, 0.35);
+            border-color: rgba(203, 32, 45, 0.4);
+            box-shadow: 0 0 15px rgba(203, 32, 45, 0.1);
+            transform: scale(1.02);
         }
-        .seg-btn:not(.active) {
-            background-color: #1e1f23;
-            color: #e3e2e7;
-            border-color: transparent;
+        .seg-btn:not(.active):hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.1);
         }
-        .seg-btn { border-width: 1px; }
-        .seg-btn:focus-visible, .icon-btn:focus-visible, select:focus-visible, textarea:focus-visible, input:focus-visible, button:focus-visible {
-            outline: 2px solid #ffb3af;
-            outline-offset: 2px;
+        
+        .custom-input {
+            background: rgba(0, 0, 0, 0.3) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            transition: all 0.3s ease !important;
+        }
+        .custom-input:focus {
+            border-color: #cb202d !important;
+            box-shadow: 0 0 0 1px #cb202d, 0 0 15px rgba(203, 32, 45, 0.2) !important;
+            background: rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        .chip-suggestion {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .chip-suggestion:hover { 
+            background: rgba(203, 32, 45, 0.1);
+            border-color: rgba(203, 32, 45, 0.3); 
+            color: #ffb3af; 
+            transform: translateY(-1px);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #cb202d, #a31722);
+            box-shadow: 0 4px 15px rgba(203, 32, 45, 0.3);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(203, 32, 45, 0.4);
+            background: linear-gradient(135deg, #df2533, #b81b28);
+        }
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        .btn-primary:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.3);
+            box-shadow: none;
+            cursor: not-allowed;
         }
 
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .card-enter { animation: fadeInUp 0.45s ease both; }
+        .card-enter { 
+            animation: fadeInUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; 
+        }
 
         @keyframes shimmer {
-            0% { background-position: -400px 0; }
-            100% { background-position: 400px 0; }
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
         }
         .skeleton {
-            background: linear-gradient(90deg, #1e1f23 0%, #292a2e 50%, #1e1f23 100%);
-            background-size: 800px 100%;
-            animation: shimmer 1.4s infinite linear;
+            background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite linear;
         }
 
-        /* Drawer (mobile filters only — desktop sidebar must never be affected) */
-        #drawer-overlay { transition: opacity 0.25s ease; }
-        .drawer-closed #drawer-overlay { opacity: 0; pointer-events: none; }
+        /* Drawer */
+        #drawer-overlay { transition: opacity 0.3s, backdrop-filter 0.3s ease; backdrop-filter: blur(4px); }
+        .drawer-closed #drawer-overlay { opacity: 0; backdrop-filter: blur(0); pointer-events: none; }
         @media (max-width: 767px) {
-            #drawer-panel { transition: transform 0.3s ease; }
+            #drawer-panel { transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
             .drawer-closed #drawer-panel { transform: translateX(-100%); }
         }
-
-        .chip-suggestion:hover { border-color: rgba(255, 179, 175, 0.5); color: #ffb3af; }
     </style>
 </head>
-<body class="bg-background text-on-background min-h-screen antialiased">
+<body class="bg-[#050505] text-on-background min-h-screen antialiased overflow-x-hidden">
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
 <div id="drawer-root" class="drawer-closed">
 
     <!-- Mobile drawer overlay -->
-    <div id="drawer-overlay" class="fixed inset-0 bg-black/60 z-40 md:hidden" onclick="closeDrawer()"></div>
+    <div id="drawer-overlay" class="fixed inset-0 bg-black/80 z-40 md:hidden" onclick="closeDrawer()"></div>
 
     <div class="flex min-h-screen">
         <!-- Side Nav / Filters -->
         <nav id="drawer-panel"
-             class="fixed md:sticky top-0 left-0 h-screen overflow-y-auto w-[85%] max-w-[360px] md:w-[360px] md:shrink-0 border-r border-white/10 bg-surface md:bg-surface/50 backdrop-blur-xl p-6 gap-6 z-50 flex flex-col">
+             class="fixed md:sticky top-0 left-0 h-screen overflow-y-auto w-[85%] max-w-[380px] md:w-[380px] md:shrink-0 border-r border-white/5 bg-[#0a0a0a]/80 backdrop-blur-2xl p-6 md:p-8 gap-8 z-50 flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.5)]">
             <div class="flex items-center justify-between pt-1">
-                <div>
-                    <h1 class="font-headline-lg text-2xl font-bold text-primary tracking-tight">CraveAI</h1>
-                    <p class="font-body-md text-sm text-on-surface-variant mt-1">Zomato AI Recommendations</p>
+                <div class="flex flex-col">
+                    <h1 class="font-headline-lg text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-white tracking-tight drop-shadow-sm">CraveAI</h1>
+                    <p class="font-body-md text-xs font-medium text-primary/70 mt-1.5 uppercase tracking-widest">Powered by Zomato</p>
                 </div>
                 <button class="icon-btn md:hidden text-on-surface-variant hover:text-primary p-1" onclick="closeDrawer()" aria-label="Close filters">
                     <span class="material-symbols-outlined">close</span>
@@ -184,7 +262,7 @@
                 <div class="flex flex-col gap-2">
                     <label for="location-select" class="font-label-sm text-xs text-on-surface-variant">Location</label>
                     <select id="location-select"
-                            class="w-full bg-[#0A0A0A] border border-white/10 rounded-lg p-3 text-on-background focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors disabled:opacity-50">
+                            class="custom-input w-full rounded-xl p-3.5 text-sm text-on-background focus:ring-0 disabled:opacity-50">
                         <option value="">Loading…</option>
                     </select>
                 </div>
@@ -192,7 +270,7 @@
                 <div class="flex flex-col gap-2">
                     <label for="cuisine-select" class="font-label-sm text-xs text-on-surface-variant">Cuisine</label>
                     <select id="cuisine-select"
-                            class="w-full bg-[#0A0A0A] border border-white/10 rounded-lg p-3 text-on-background focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors disabled:opacity-50">
+                            class="custom-input w-full rounded-xl p-3.5 text-sm text-on-background focus:ring-0 disabled:opacity-50">
                         <option value="">Any cuisine</option>
                     </select>
                 </div>
@@ -228,7 +306,7 @@
                 <div class="flex flex-col gap-2">
                     <label for="prefs-input" class="font-label-sm text-xs text-on-surface-variant">Describe your vibe</label>
                     <textarea id="prefs-input" maxlength="500"
-                              class="w-full bg-[#0A0A0A] border border-white/10 rounded-lg p-3 text-on-background focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors resize-none"
+                              class="custom-input w-full rounded-xl p-3.5 text-sm text-on-background focus:ring-0 resize-none"
                               placeholder="e.g., Cozy spot for a late night date…" rows="2"></textarea>
                     <div class="flex flex-wrap gap-2 mt-1">
                         <button type="button" class="chip-suggestion text-xs px-3 py-1 rounded-full border border-white/10 text-on-surface-variant transition-colors">Birthday dinner</button>
@@ -239,12 +317,12 @@
 
                 <div class="flex gap-2 mt-1">
                     <button id="submit-btn" type="submit"
-                            class="flex-1 py-3 bg-primary-container text-white font-label-md rounded-lg hover:bg-inverse-primary transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+                            class="btn-primary flex-1 py-3.5 text-white font-label-md rounded-xl flex items-center justify-center gap-2">
                         <span id="submit-icon" class="material-symbols-outlined text-[18px]">psychology</span>
                         <span id="submit-label">Get AI Recommendations</span>
                     </button>
                     <button id="reset-btn" type="button" title="Reset filters" aria-label="Reset filters"
-                            class="icon-btn px-3 rounded-lg border border-white/10 text-on-surface-variant hover:text-primary hover:border-primary/40 transition-colors">
+                            class="icon-btn px-4 rounded-xl border border-white/10 text-on-surface-variant hover:bg-white/5 hover:text-primary transition-all duration-300">
                         <span class="material-symbols-outlined text-[20px]">refresh</span>
                     </button>
                 </div>
@@ -253,14 +331,14 @@
 
         <!-- Main Content Area -->
         <main class="flex-1 min-h-screen relative bg-[#0A0A0A]">
-            <header class="sticky top-0 z-30 flex justify-between items-center w-full px-5 md:px-12 py-4 md:py-6 backdrop-blur-md bg-surface/80 border-b border-white/5">
+            <header class="sticky top-0 z-30 flex justify-between items-center w-full px-5 md:px-12 py-5 md:py-8 backdrop-blur-xl bg-[#0a0a0a]/60 border-b border-white/5">
                 <div class="flex items-center gap-3">
                     <button class="icon-btn md:hidden text-on-surface-variant hover:text-primary p-1" onclick="openDrawer()" aria-label="Open filters">
                         <span class="material-symbols-outlined">tune</span>
                     </button>
-                    <h2 class="font-headline-md text-xl md:text-2xl text-primary opacity-90">Discover</h2>
+                    <h2 class="font-headline-md text-2xl md:text-3xl font-semibold text-white/90 tracking-wide">Discover</h2>
                 </div>
-                <span id="results-count" class="hidden text-xs md:text-sm text-on-surface-variant bg-surface-container px-3 py-1.5 rounded-full"></span>
+                <span id="results-count" class="hidden text-xs md:text-sm text-primary bg-primary/10 border border-primary/20 px-4 py-2 rounded-full font-medium"></span>
             </header>
 
             <div id="fallback-banner" class="hidden mx-5 md:mx-12 mt-6 bg-error-container/20 border border-error-container/50 rounded-lg p-4 flex items-center gap-3 text-error">
@@ -277,19 +355,19 @@
             <div class="p-5 md:p-12 max-w-[1200px] mx-auto">
                 <!-- Empty State -->
                 <div id="empty-state" class="flex flex-col items-center justify-center min-h-[60vh] text-center">
-                    <div class="w-40 h-40 md:w-56 md:h-56 mb-8 relative ai-border rounded-full p-1">
-                        <div class="w-full h-full rounded-full bg-surface-container flex items-center justify-center">
-                            <span class="material-symbols-outlined text-tertiary" style="font-size: 72px;">restaurant</span>
+                    <div class="w-40 h-40 md:w-56 md:h-56 mb-10 relative ai-border rounded-full p-1 shadow-[0_0_60px_rgba(203,32,45,0.15)]">
+                        <div class="w-full h-full rounded-full bg-[#121212] flex items-center justify-center">
+                            <span class="material-symbols-outlined text-transparent bg-clip-text bg-gradient-to-br from-primary to-tertiary" style="font-size: 80px;">restaurant</span>
                         </div>
                     </div>
-                    <h3 class="font-display-lg text-2xl md:text-4xl mb-4 text-on-background">Your Personal AI Concierge</h3>
-                    <p class="font-body-lg text-base md:text-lg text-on-surface-variant max-w-lg">Set your craving on the left, and I'll curate the perfect pick — with a real reason for each one.</p>
+                    <h3 class="font-headline-lg text-3xl md:text-5xl mb-5 font-bold text-white">Your Personal AI Concierge</h3>
+                    <p class="font-body-lg text-lg md:text-xl text-on-surface-variant max-w-xl leading-relaxed">Set your craving on the left, and I'll curate the perfect pick — with a real reason for each one.</p>
                 </div>
 
                 <!-- Loading State (skeleton cards) -->
                 <div id="loading-state" class="hidden flex flex-col gap-4 pb-24" aria-busy="true" aria-live="polite">
                     <div class="flex items-center gap-3 text-on-surface-variant mb-2">
-                        <div class="w-5 h-5 border-2 border-white/10 border-t-primary rounded-full animate-spin"></div>
+                        <div class="w-6 h-6 border-2 border-white/10 border-t-primary rounded-full animate-spin"></div>
                         <span>AI is thinking…</span>
                     </div>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -310,8 +388,8 @@
                 <!-- Results State -->
                 <div id="results-state" class="hidden flex flex-col gap-6 pb-24">
                     <div class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-primary">auto_awesome</span>
-                        <h3 class="font-headline-lg text-2xl md:text-3xl">Top Picks for You</h3>
+                        <span class="material-symbols-outlined text-primary drop-shadow-[0_0_8px_rgba(203,32,45,0.6)]">auto_awesome</span>
+                        <h3 class="font-headline-lg text-2xl md:text-3xl font-bold text-white">Top Picks for You</h3>
                     </div>
                     <p id="summary-text" class="text-on-surface-variant -mt-3"></p>
 
@@ -326,34 +404,35 @@
 
 <!-- Template for Restaurant Card -->
 <template id="card-template">
-    <div class="card-enter glass-panel rounded-2xl overflow-hidden hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(203,32,45,0.15)] transition-all duration-300 relative ai-border group p-6 md:p-7 flex flex-col">
-        <div class="flex justify-between items-start gap-3 mb-4">
-            <div class="flex items-start gap-3 min-w-0">
-                <div class="shrink-0 bg-primary-container text-white font-headline-md px-2.5 py-1 rounded-lg text-sm">
+    <div class="card-enter glass-panel rounded-3xl overflow-hidden hover:-translate-y-2 hover:shadow-[0_12px_40px_rgba(203,32,45,0.2)] transition-all duration-500 relative ai-border group p-7 md:p-8 flex flex-col">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/10 to-transparent rounded-bl-full pointer-events-none transition-opacity opacity-50 group-hover:opacity-100"></div>
+        <div class="flex justify-between items-start gap-4 mb-6 relative z-10">
+            <div class="flex items-start gap-4 min-w-0">
+                <div class="shrink-0 bg-gradient-to-br from-primary to-primary-container text-white font-headline-md px-3 py-1.5 rounded-xl text-sm shadow-[0_4px_12px_rgba(203,32,45,0.3)]">
                     <span class="card-rank">#1</span>
                 </div>
-                <div class="min-w-0">
-                    <h4 class="card-name font-headline-lg text-lg md:text-xl mb-2 group-hover:text-primary transition-colors truncate">Restaurant Name</h4>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="card-cuisine px-2.5 py-0.5 rounded-full bg-surface-variant text-on-background text-xs truncate max-w-[220px]">Cuisine</span>
-                        <span class="card-location px-2.5 py-0.5 rounded-full bg-surface-variant text-on-background text-xs">Location</span>
+                <div class="min-w-0 pt-0.5">
+                    <h4 class="card-name font-headline-lg text-xl md:text-2xl font-semibold mb-2.5 text-white group-hover:text-primary transition-colors truncate">Restaurant Name</h4>
+                    <div class="flex flex-wrap gap-2.5">
+                        <span class="card-cuisine px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-on-background text-xs truncate max-w-[220px]">Cuisine</span>
+                        <span class="card-location px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-on-background text-xs">Location</span>
                     </div>
                 </div>
             </div>
-            <div class="flex flex-col items-end shrink-0">
-                <div class="flex items-center gap-1 text-primary mb-1">
-                    <span class="material-symbols-outlined text-[18px]">star</span>
-                    <span class="card-rating font-headline-md text-lg">4.9</span>
+            <div class="flex flex-col items-end shrink-0 pt-1">
+                <div class="flex items-center gap-1.5 text-primary mb-2">
+                    <span class="material-symbols-outlined text-[20px] fill-current">star</span>
+                    <span class="card-rating font-headline-md font-bold text-xl">4.9</span>
                 </div>
-                <span class="card-cost text-xs text-on-surface-variant whitespace-nowrap">₹500 for two</span>
+                <span class="card-cost text-xs font-medium text-on-surface-variant whitespace-nowrap bg-white/5 px-2 py-1 rounded-md">₹500 for two</span>
             </div>
         </div>
 
-        <div class="mt-auto p-4 glass-panel-elevated rounded-xl flex gap-3 items-start">
-            <span class="material-symbols-outlined text-tertiary mt-0.5 text-[18px]">psychology</span>
+        <div class="mt-auto p-5 glass-panel-elevated rounded-2xl flex gap-4 items-start relative z-10 group-hover:bg-white/[0.04] transition-colors">
+            <span class="material-symbols-outlined text-tertiary mt-0.5 text-[22px] drop-shadow-[0_0_8px_rgba(128,208,248,0.5)]">psychology</span>
             <div class="min-w-0">
-                <h5 class="text-[10px] text-tertiary mb-1.5 uppercase tracking-wider font-bold">Why AI Chose This</h5>
-                <p class="card-explanation text-sm text-on-background/80 leading-relaxed">Explanation goes here.</p>
+                <h5 class="text-[11px] text-tertiary mb-2 uppercase tracking-widest font-bold">Why AI Chose This</h5>
+                <p class="card-explanation text-sm text-white/80 leading-relaxed font-light">Explanation goes here.</p>
             </div>
         </div>
     </div>
